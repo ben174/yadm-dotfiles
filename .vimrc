@@ -1,0 +1,138 @@
+" Load vim-plug
+if empty(glob("~/.vim/autoload/plug.vim"))
+    execute '!curl -fLo ~/.vim/autoload/plug.vim https://raw.github.com/junegunn/vim-plug/master/plug.vim'
+endif
+
+call plug#begin()
+
+" A sensible baseline git config
+Plug 'tpope/vim-sensible'
+
+" Cool Git shortcuts
+Plug 'tpope/vim-fugitive'
+
+" Easily surround text, or change surrounding text
+Plug 'tpope/vim-surround'
+
+" Better javascript indenting
+Plug 'pangloss/vim-javascript'
+
+" Flake8 (PEP8) for Python
+Plug 'nvie/vim-flake8'
+
+" Quickly, visually, jump around in a file
+Plug 'easymotion/vim-easymotion'
+
+" HTML Zen editing
+Plug 'mattn/emmet-vim'
+
+" Fuzzy file finder: fzf
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+
+" Async syntax checker (better than syntastic)
+Plug 'w0rp/ale'
+
+" JSX stuff
+Plug 'pangloss/vim-javascript'
+Plug 'mxw/vim-jsx'
+
+" Allows for async running of tasks (reformatting on saving)
+Plug 'skywind3000/asyncrun.vim'
+
+call plug#end()
+
+let mapleader=","                                    " comma as leader key
+syntax on                                            " syntax highlighting
+
+
+" suppposedly makes vim emmit work but it doesnt
+let g:user_emmet_leader_key='<Tab>'
+let g:user_emmet_settings = {
+  \  'javascript.jsx' : {
+    \      'extends' : 'jsx',
+    \  },
+  \}
+
+
+" ale settings
+let g:ale_sign_error = '●' " Less aggressive than the default '>>'
+let g:ale_sign_warning = '.'
+let g:ale_lint_on_enter = 0 " Less distracting when opening a new file
+
+
+" auto format js files on save
+autocmd BufWritePost *.js AsyncRun -post=checktime ./node_modules/.bin/eslint --fix %
+
+
+" set smartindent
+set number                                           " show line numbers
+set tabstop=4                                        " width of tab character
+set shiftwidth=4                                     " affects <<, >>, ==
+set expandtab
+set smarttab
+set backspace=indent,eol,start
+set nocompatible
+set scrolloff=5
+
+set nowrap
+
+set pastetoggle=<F2>                                 " <F2> toggles paste mode
+
+
+" backup to ~/.tmp
+set backup
+set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set backupskip=/tmp/*,/private/tmp/*
+set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set writebackup
+
+" ignore filetypes
+set wildignore+=*/venv/**                            " ignores virtual envs
+set wildignore+=*/node_modules/**                    " ignores node packages
+set wildignore+=*.pyc                                " ignores python byte code
+set wildignore+=*/static_files/**                    " django static files
+
+autocmd FileType python setlocal expandtab shiftwidth=4 softtabstop=4
+autocmd FileType javascript setlocal expandtab shiftwidth=2 softtabstop=2
+autocmd FileType html setlocal expandtab shiftwidth=2 softtabstop=2
+filetype plugin indent on
+filetype on
+
+" folding settings
+set foldmethod=indent                                " fold based on indent
+set foldnestmax=10                                   " deepest fold is 10 levels
+set nofoldenable                                     " don't fold by default
+set foldlevel=1                                      " this is just what i use
+
+set cc=120
+
+
+" highlight trailing whitespace
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd InsertLeave * match ExtraWhitespace /\s\+$/
+autocmd BufWinLeave * call clearmatches()
+
+" delete trailing whitespace
+autocmd BufWritePre *.py,*.xml :%s/\s\+$//e
+
+"START: fzf stuff
+
+" Mapping selecting mappings
+nmap <leader><tab> <plug>(fzf-maps-n)
+xmap <leader><tab> <plug>(fzf-maps-x)
+omap <leader><tab> <plug>(fzf-maps-o)
+
+nmap <c-p> :Files<CR>
+nmap <c-l> :Lines<CR>
+
+" Insert mode completion
+imap <c-x><c-k> <plug>(fzf-complete-word)
+imap <c-x><c-f> <plug>(fzf-complete-path)
+imap <c-x><c-j> <plug>(fzf-complete-file-ag)
+imap <c-x><c-l> <plug>(fzf-complete-line)
+
+"END: fzf stuff
